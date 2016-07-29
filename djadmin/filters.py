@@ -7,8 +7,8 @@ certain test -- e.g. being a DateField or ForeignKey.
 """
 import datetime
 
-from django.contrib.admin.options import IncorrectLookupParameters
-from django.contrib.admin.utils import (
+from djadmin.options import IncorrectLookupParameters
+from djadmin.utils import (
     get_model_from_relation, prepare_lookup_value, reverse_field_path,
 )
 from django.core.exceptions import ImproperlyConfigured, ValidationError

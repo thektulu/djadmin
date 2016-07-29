@@ -8,7 +8,7 @@ from django.utils import timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admin', '0001_initial'),
+        ('djadmin', '0001_initial'),
     ]
 
     # No database changes; removes auto_add and adds default/editable.

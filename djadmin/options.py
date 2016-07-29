@@ -9,13 +9,13 @@ from functools import partial, reduce, update_wrapper
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin import helpers, widgets
-from django.contrib.admin.checks import (
+from djadmin import helpers, widgets
+from djadmin.checks import (
     BaseModelAdminChecks, InlineModelAdminChecks, ModelAdminChecks,
 )
-from django.contrib.admin.exceptions import DisallowedModelAdminToField
-from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
-from django.contrib.admin.utils import (
+from djadmin.exceptions import DisallowedModelAdminToField
+from djadmin.templatetags.admin_urls import add_preserved_filters
+from djadmin.utils import (
     NestedObjects, flatten_fieldsets, get_deleted_objects,
     lookup_needs_distinct, model_format_dict, quote, unquote,
 )
@@ -328,7 +328,7 @@ class BaseModelAdmin(six.with_metaclass(forms.MediaDefiningClass)):
         return qs
 
     def lookup_allowed(self, lookup, value):
-        from django.contrib.admin.filters import SimpleListFilter
+        from djadmin.filters import SimpleListFilter
 
         model = self.model
         # Check FKey lookups that are allowed, so that popups produced by
@@ -650,7 +650,7 @@ class ModelAdmin(BaseModelAdmin):
         """
         Returns the ChangeList class for use on the changelist page.
         """
-        from django.contrib.admin.views.main import ChangeList
+        from djadmin.views.main import ChangeList
         return ChangeList
 
     def get_object(self, request, object_id, from_field=None):
@@ -711,7 +711,7 @@ class ModelAdmin(BaseModelAdmin):
 
         The default implementation creates an admin LogEntry object.
         """
-        from django.contrib.admin.models import LogEntry, ADDITION
+        from djadmin.models import LogEntry, ADDITION
         LogEntry.objects.log_action(
             user_id=request.user.pk,
             content_type_id=get_content_type_for_model(object).pk,
@@ -727,7 +727,7 @@ class ModelAdmin(BaseModelAdmin):
 
         The default implementation creates an admin LogEntry object.
         """
-        from django.contrib.admin.models import LogEntry, CHANGE
+        from djadmin.models import LogEntry, CHANGE
         LogEntry.objects.log_action(
             user_id=request.user.pk,
             content_type_id=get_content_type_for_model(object).pk,
@@ -744,7 +744,7 @@ class ModelAdmin(BaseModelAdmin):
 
         The default implementation creates an admin LogEntry object.
         """
-        from django.contrib.admin.models import LogEntry, DELETION
+        from djadmin.models import LogEntry, DELETION
         LogEntry.objects.log_action(
             user_id=request.user.pk,
             content_type_id=get_content_type_for_model(object).pk,
@@ -1516,7 +1516,7 @@ class ModelAdmin(BaseModelAdmin):
         """
         The 'change list' admin view for this model.
         """
-        from django.contrib.admin.views.main import ERROR_FLAG
+        from djadmin.views.main import ERROR_FLAG
         opts = self.model._meta
         app_label = opts.app_label
         if not self.has_change_permission(request, None):
@@ -1748,7 +1748,7 @@ class ModelAdmin(BaseModelAdmin):
 
     def history_view(self, request, object_id, extra_context=None):
         "The 'history' admin view for this model."
-        from django.contrib.admin.models import LogEntry
+        from djadmin.models import LogEntry
         # First check if the user can see this history.
         model = self.model
         obj = self.get_object(request, unquote(object_id))

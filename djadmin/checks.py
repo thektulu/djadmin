@@ -5,7 +5,7 @@ from itertools import chain
 
 from django.apps import apps
 from django.conf import settings
-from django.contrib.admin.utils import (
+from djadmin.utils import (
     NotRelationField, flatten, get_fields_from_path,
 )
 from django.core import checks
@@ -18,7 +18,7 @@ from django.template.engine import Engine
 
 
 def check_admin_app(**kwargs):
-    from django.contrib.admin.sites import system_check_errors
+    from djadmin.sites import system_check_errors
 
     return system_check_errors
 
@@ -339,7 +339,7 @@ class BaseModelAdminChecks(object):
     def _check_radio_fields_value(self, obj, val, label):
         """ Check type of a value of `radio_fields` dictionary. """
 
-        from django.contrib.admin.options import HORIZONTAL, VERTICAL
+        from djadmin.options import HORIZONTAL, VERTICAL
 
         if val not in (HORIZONTAL, VERTICAL):
             return [
@@ -560,7 +560,7 @@ class ModelAdminChecks(BaseModelAdminChecks):
         """ Check one inline model admin. """
         inline_label = '.'.join([inline.__module__, inline.__name__])
 
-        from django.contrib.admin.options import BaseModelAdmin
+        from djadmin.options import BaseModelAdmin
 
         if not issubclass(inline, BaseModelAdmin):
             return [
@@ -696,7 +696,7 @@ class ModelAdminChecks(BaseModelAdminChecks):
         3. SomeListFilter - a non-field list filter class
         """
 
-        from django.contrib.admin import ListFilter, FieldListFilter
+        from djadmin import ListFilter, FieldListFilter
 
         if callable(item) and not isinstance(item, models.Field):
             # If item is option 3, it should be a ListFilter...

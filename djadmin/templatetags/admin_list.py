@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 import datetime
 import warnings
 
-from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
-from django.contrib.admin.utils import (
+from djadmin.templatetags.admin_urls import add_preserved_filters
+from djadmin.utils import (
     display_for_field, display_for_value, get_fields_from_path,
     label_for_field, lookup_field,
 )
-from django.contrib.admin.views.main import (
+from djadmin.views.main import (
     ALL_VAR, ORDER_VAR, PAGE_VAR, SEARCH_VAR,
 )
 from django.core.exceptions import ObjectDoesNotExist

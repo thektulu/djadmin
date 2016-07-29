@@ -5,7 +5,7 @@ import warnings
 
 from django import forms
 from django.conf import settings
-from django.contrib.admin.utils import (
+from djadmin.utils import (
     display_for_field, flatten_fieldsets, help_text_for_field, label_for_field,
     lookup_field,
 )
@@ -194,7 +194,7 @@ class AdminReadonlyField(object):
                            capfirst(force_text(label)))
 
     def contents(self):
-        from django.contrib.admin.templatetags.admin_list import _boolean_icon
+        from djadmin.templatetags.admin_list import _boolean_icon
         field, obj, model_admin = self.field['field'], self.form.instance, self.model_admin
         try:
             f, attr, value = lookup_field(field, obj, model_admin)

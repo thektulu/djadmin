@@ -1,14 +1,14 @@
 import sys
 from collections import OrderedDict
 
-from django.contrib.admin import FieldListFilter
-from django.contrib.admin.exceptions import (
+from djadmin import FieldListFilter
+from djadmin.exceptions import (
     DisallowedModelAdminLookup, DisallowedModelAdminToField,
 )
-from django.contrib.admin.options import (
+from djadmin.options import (
     IS_POPUP_VAR, TO_FIELD_VAR, IncorrectLookupParameters,
 )
-from django.contrib.admin.utils import (
+from djadmin.utils import (
     get_fields_from_path, lookup_needs_distinct, prepare_lookup_value, quote,
 )
 from django.core.exceptions import (

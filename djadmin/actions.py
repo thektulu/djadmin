@@ -3,8 +3,8 @@ Built-in, globally-available admin actions.
 """
 
 from django.contrib import messages
-from django.contrib.admin import helpers
-from django.contrib.admin.utils import get_deleted_objects, model_ngettext
+from djadmin import helpers
+from djadmin.utils import get_deleted_objects, model_ngettext
 from django.core.exceptions import PermissionDenied
 from django.db import router
 from django.template.response import TemplateResponse

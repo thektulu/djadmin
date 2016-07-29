@@ -2,7 +2,7 @@ from functools import update_wrapper
 
 from django.apps import apps
 from django.conf import settings
-from django.contrib.admin import ModelAdmin, actions
+from djadmin import ModelAdmin, actions
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db.models.base import ModelBase
@@ -201,7 +201,7 @@ class AdminSite(object):
                 if request.path == reverse('admin:logout', current_app=self.name):
                     index_path = reverse('admin:index', current_app=self.name)
                     return HttpResponseRedirect(index_path)
-                # Inner import to prevent django.contrib.admin (app) from
+                # Inner import to prevent djadmin (app) from
                 # importing django.contrib.auth.models.User (unrelated model).
                 from django.contrib.auth.views import redirect_to_login
                 return redirect_to_login(
@@ -288,7 +288,7 @@ class AdminSite(object):
         """
         Handles the "change password" task -- both form display and validation.
         """
-        from django.contrib.admin.forms import AdminPasswordChangeForm
+        from djadmin.forms import AdminPasswordChangeForm
         from django.contrib.auth.views import PasswordChangeView
         url = reverse('admin:password_change_done', current_app=self.name)
         defaults = {
@@ -321,7 +321,7 @@ class AdminSite(object):
         `extra_context` is unused but present for consistency with the other
         admin views.
         """
-        return JavaScriptCatalog.as_view(packages=['django.contrib.admin'])(request)
+        return JavaScriptCatalog.as_view(packages=['djadmin'])(request)
 
     @never_cache
     def logout(self, request, extra_context=None):
@@ -358,8 +358,8 @@ class AdminSite(object):
         from django.contrib.auth.views import LoginView
         # Since this module gets imported in the application's root package,
         # it cannot import models from other applications at the module level,
-        # and django.contrib.admin.forms eventually imports User.
-        from django.contrib.admin.forms import AdminAuthenticationForm
+        # and djadmin.forms eventually imports User.
+        from djadmin.forms import AdminAuthenticationForm
         context = dict(
             self.each_context(request),
             title=_('Log in'),

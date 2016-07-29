@@ -12,11 +12,11 @@ class CSPMiddleware(MiddlewareMixin):
         return response
 
 
-@modify_settings(MIDDLEWARE={'append': 'django.contrib.admin.tests.CSPMiddleware'})
+@modify_settings(MIDDLEWARE={'append': 'djadmin.tests.CSPMiddleware'})
 class AdminSeleniumTestCase(SeleniumTestCase, StaticLiveServerTestCase):
 
     available_apps = [
-        'django.contrib.admin',
+        'djadmin',
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
