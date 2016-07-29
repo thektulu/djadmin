@@ -111,7 +111,7 @@ class AdminSeleniumTestCase(SeleniumTestCase, StaticLiveServerTestCase):
             # ignore it.
             pass
 
-    def admin_login(self, username, password, login_url='/admin/'):
+    def admin_login(self, username, password, login_url='/djadmin/'):
         """
         Helper function to log into the admin.
         """

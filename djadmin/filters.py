@@ -20,7 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 
 class ListFilter(object):
     title = None  # Human-readable title to appear in the right sidebar.
-    template = 'admin/filter.html'
+    template = 'djadmin/filter.html'
 
     def __init__(self, request, params, model, model_admin):
         # This dictionary will eventually contain the request's query string

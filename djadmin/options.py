@@ -14,7 +14,7 @@ from djadmin.checks import (
     BaseModelAdminChecks, InlineModelAdminChecks, ModelAdminChecks,
 )
 from djadmin.exceptions import DisallowedModelAdminToField
-from djadmin.templatetags.admin_urls import add_preserved_filters
+from djadmin.templatetags.djadmin_urls import add_preserved_filters
 from djadmin.utils import (
     NestedObjects, flatten_fieldsets, get_deleted_objects,
     lookup_needs_distinct, model_format_dict, quote, unquote,
@@ -269,7 +269,7 @@ class BaseModelAdmin(six.with_metaclass(forms.MediaDefiningClass)):
             return self.view_on_site(obj)
         elif self.view_on_site and hasattr(obj, 'get_absolute_url'):
             # use the ContentType lookup if view_on_site is True
-            return reverse('admin:view_on_site', kwargs={
+            return reverse('djadmin:view_on_site', kwargs={
                 'content_type_id': get_content_type_for_model(obj).pk,
                 'object_id': obj.pk
             })
@@ -571,13 +571,13 @@ class ModelAdmin(BaseModelAdmin):
             'core.js',
             'vendor/jquery/jquery%s.js' % extra,
             'jquery.init.js',
-            'admin/RelatedObjectLookups.js',
+            'djadmin/RelatedObjectLookups.js',
             'actions%s.js' % extra,
             'urlify.js',
             'prepopulate%s.js' % extra,
             'vendor/xregexp/xregexp%s.js' % extra,
         ]
-        return forms.Media(js=['admin/js/%s' % url for url in js])
+        return forms.Media(js=['djadmin/js/%s' % url for url in js])
 
     def get_model_perms(self, request):
         """
@@ -919,7 +919,7 @@ class ModelAdmin(BaseModelAdmin):
         if self.preserve_filters and match:
             opts = self.model._meta
             current_url = '%s:%s' % (match.app_name, match.url_name)
-            changelist_url = 'admin:%s_%s_changelist' % (opts.app_label, opts.model_name)
+            changelist_url = 'djadmin:%s_%s_changelist' % (opts.app_label, opts.model_name)
             if current_url == changelist_url:
                 preserved_filters = request.GET.urlencode()
             else:
@@ -1062,9 +1062,9 @@ class ModelAdmin(BaseModelAdmin):
         request.current_app = self.admin_site.name
 
         return TemplateResponse(request, form_template or [
-            "admin/%s/%s/change_form.html" % (app_label, opts.model_name),
-            "admin/%s/change_form.html" % app_label,
-            "admin/change_form.html"
+            "djadmin/%s/%s/change_form.html" % (app_label, opts.model_name),
+            "djadmin/%s/change_form.html" % app_label,
+            "djadmin/change_form.html"
         ], context)
 
     def response_add(self, request, obj, post_url_continue=None):
@@ -1075,7 +1075,7 @@ class ModelAdmin(BaseModelAdmin):
         pk_value = obj._get_pk_val()
         preserved_filters = self.get_preserved_filters(request)
         obj_url = reverse(
-            'admin:%s_%s_change' % (opts.app_label, opts.model_name),
+            'djadmin:%s_%s_change' % (opts.app_label, opts.model_name),
             args=(quote(pk_value),),
             current_app=self.admin_site.name,
         )
@@ -1102,7 +1102,7 @@ class ModelAdmin(BaseModelAdmin):
                 'value': six.text_type(value),
                 'obj': six.text_type(obj),
             })
-            return SimpleTemplateResponse('admin/popup_response.html', {
+            return SimpleTemplateResponse('djadmin/popup_response.html', {
                 'popup_response_data': popup_response_data,
             })
 
@@ -1159,7 +1159,7 @@ class ModelAdmin(BaseModelAdmin):
                 'obj': six.text_type(obj),
                 'new_value': six.text_type(new_value),
             })
-            return SimpleTemplateResponse('admin/popup_response.html', {
+            return SimpleTemplateResponse('djadmin/popup_response.html', {
                 'popup_response_data': popup_response_data,
             })
 
@@ -1187,7 +1187,7 @@ class ModelAdmin(BaseModelAdmin):
                 **msg_dict
             )
             self.message_user(request, msg, messages.SUCCESS)
-            redirect_url = reverse('admin:%s_%s_change' %
+            redirect_url = reverse('djadmin:%s_%s_change' %
                                    (opts.app_label, opts.model_name),
                                    args=(pk_value,),
                                    current_app=self.admin_site.name)
@@ -1200,7 +1200,7 @@ class ModelAdmin(BaseModelAdmin):
                 **msg_dict
             )
             self.message_user(request, msg, messages.SUCCESS)
-            redirect_url = reverse('admin:%s_%s_add' %
+            redirect_url = reverse('djadmin:%s_%s_add' %
                                    (opts.app_label, opts.model_name),
                                    current_app=self.admin_site.name)
             redirect_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, redirect_url)
@@ -1221,13 +1221,13 @@ class ModelAdmin(BaseModelAdmin):
         """
         opts = self.model._meta
         if self.has_change_permission(request, None):
-            post_url = reverse('admin:%s_%s_changelist' %
+            post_url = reverse('djadmin:%s_%s_changelist' %
                                (opts.app_label, opts.model_name),
                                current_app=self.admin_site.name)
             preserved_filters = self.get_preserved_filters(request)
             post_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, post_url)
         else:
-            post_url = reverse('admin:index',
+            post_url = reverse('djadmin:index',
                                current_app=self.admin_site.name)
         return HttpResponseRedirect(post_url)
 
@@ -1239,13 +1239,13 @@ class ModelAdmin(BaseModelAdmin):
         opts = self.model._meta
 
         if self.has_change_permission(request, None):
-            post_url = reverse('admin:%s_%s_changelist' %
+            post_url = reverse('djadmin:%s_%s_changelist' %
                                (opts.app_label, opts.model_name),
                                current_app=self.admin_site.name)
             preserved_filters = self.get_preserved_filters(request)
             post_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, post_url)
         else:
-            post_url = reverse('admin:index',
+            post_url = reverse('djadmin:index',
                                current_app=self.admin_site.name)
         return HttpResponseRedirect(post_url)
 
@@ -1328,7 +1328,7 @@ class ModelAdmin(BaseModelAdmin):
                 'action': 'delete',
                 'value': str(obj_id),
             })
-            return SimpleTemplateResponse('admin/popup_response.html', {
+            return SimpleTemplateResponse('djadmin/popup_response.html', {
                 'popup_response_data': popup_response_data,
             })
 
@@ -1343,7 +1343,7 @@ class ModelAdmin(BaseModelAdmin):
 
         if self.has_change_permission(request, None):
             post_url = reverse(
-                'admin:%s_%s_changelist' % (opts.app_label, opts.model_name),
+                'djadmin:%s_%s_changelist' % (opts.app_label, opts.model_name),
                 current_app=self.admin_site.name,
             )
             preserved_filters = self.get_preserved_filters(request)
@@ -1351,7 +1351,7 @@ class ModelAdmin(BaseModelAdmin):
                 {'preserved_filters': preserved_filters, 'opts': opts}, post_url
             )
         else:
-            post_url = reverse('admin:index', current_app=self.admin_site.name)
+            post_url = reverse('djadmin:index', current_app=self.admin_site.name)
         return HttpResponseRedirect(post_url)
 
     def render_delete_form(self, request, context):
@@ -1368,9 +1368,9 @@ class ModelAdmin(BaseModelAdmin):
         return TemplateResponse(
             request,
             self.delete_confirmation_template or [
-                "admin/{}/{}/delete_confirmation.html".format(app_label, opts.model_name),
-                "admin/{}/delete_confirmation.html".format(app_label),
-                "admin/delete_confirmation.html",
+                "djadmin/{}/{}/delete_confirmation.html".format(app_label, opts.model_name),
+                "djadmin/{}/delete_confirmation.html".format(app_label),
+                "djadmin/delete_confirmation.html",
             ],
             context,
         )
@@ -1550,7 +1550,7 @@ class ModelAdmin(BaseModelAdmin):
             # something is screwed up with the database, so display an error
             # page.
             if ERROR_FLAG in request.GET.keys():
-                return SimpleTemplateResponse('admin/invalid_setup.html', {
+                return SimpleTemplateResponse('djadmin/invalid_setup.html', {
                     'title': _('Database error'),
                 })
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
@@ -1674,9 +1674,9 @@ class ModelAdmin(BaseModelAdmin):
         request.current_app = self.admin_site.name
 
         return TemplateResponse(request, self.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.model_name),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
+            'djadmin/%s/%s/change_list.html' % (app_label, opts.model_name),
+            'djadmin/%s/change_list.html' % app_label,
+            'djadmin/change_list.html'
         ], context)
 
     @csrf_protect_m
@@ -1783,9 +1783,9 @@ class ModelAdmin(BaseModelAdmin):
         request.current_app = self.admin_site.name
 
         return TemplateResponse(request, self.object_history_template or [
-            "admin/%s/%s/object_history.html" % (app_label, opts.model_name),
-            "admin/%s/object_history.html" % app_label,
-            "admin/object_history.html"
+            "djadmin/%s/%s/object_history.html" % (app_label, opts.model_name),
+            "djadmin/%s/object_history.html" % app_label,
+            "djadmin/object_history.html"
         ], context)
 
     def _create_formsets(self, request, obj, change):
@@ -1859,7 +1859,7 @@ class InlineModelAdmin(BaseModelAdmin):
             js.extend(['SelectBox.js', 'SelectFilter2.js'])
         if self.classes and 'collapse' in self.classes:
             js.append('collapse%s.js' % extra)
-        return forms.Media(js=['admin/js/%s' % url for url in js])
+        return forms.Media(js=['djadmin/js/%s' % url for url in js])
 
     def get_extra(self, request, obj=None, **kwargs):
         """Hook for customizing the number of extra inline forms."""
@@ -1995,8 +1995,8 @@ class InlineModelAdmin(BaseModelAdmin):
 
 
 class StackedInline(InlineModelAdmin):
-    template = 'admin/edit_inline/stacked.html'
+    template = 'djadmin/edit_inline/stacked.html'
 
 
 class TabularInline(InlineModelAdmin):
-    template = 'admin/edit_inline/tabular.html'
+    template = 'djadmin/edit_inline/tabular.html'

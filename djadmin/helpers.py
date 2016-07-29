@@ -82,7 +82,7 @@ class Fieldset(object):
                 'jquery.init.js',
                 'collapse%s.js' % extra,
             ]
-            return forms.Media(js=['admin/js/%s' % url for url in js])
+            return forms.Media(js=['djadmin/js/%s' % url for url in js])
         return forms.Media()
     media = property(_media)
 
@@ -194,7 +194,7 @@ class AdminReadonlyField(object):
                            capfirst(force_text(label)))
 
     def contents(self):
-        from djadmin.templatetags.admin_list import _boolean_icon
+        from djadmin.templatetags.djadmin_list import _boolean_icon
         field, obj, model_admin = self.field['field'], self.form.instance, self.model_admin
         try:
             f, attr, value = lookup_field(field, obj, model_admin)

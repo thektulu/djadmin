@@ -11,7 +11,7 @@ except ImportError:
 else:
     closure_compiler = os.path.join(os.path.dirname(closure.__file__), 'closure.jar')
 
-js_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'admin', 'js')
+js_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'djadmin', 'js')
 
 
 def main():

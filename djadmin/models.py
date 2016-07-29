@@ -63,7 +63,7 @@ class LogEntry(models.Model):
     class Meta:
         verbose_name = _('log entry')
         verbose_name_plural = _('log entries')
-        db_table = 'django_admin_log'
+        db_table = 'djadmin_log'
         ordering = ('-action_time',)
 
     def __repr__(self):
@@ -140,7 +140,7 @@ class LogEntry(models.Model):
         Returns the admin URL to edit the object represented by this log entry.
         """
         if self.content_type and self.object_id:
-            url_name = 'admin:%s_%s_change' % (self.content_type.app_label, self.content_type.model)
+            url_name = 'djadmin:%s_%s_change' % (self.content_type.app_label, self.content_type.model)
             try:
                 return reverse(url_name, args=(quote(self.object_id),))
             except NoReverseMatch:

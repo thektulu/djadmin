@@ -58,7 +58,7 @@ class AdminSite(object):
     password_change_template = None
     password_change_done_template = None
 
-    def __init__(self, name='admin'):
+    def __init__(self, name='djadmin'):
         self._registry = {}  # model_class class -> admin_class instance
         self.name = name
         self._actions = {'delete_selected': actions.delete_selected}
@@ -198,15 +198,15 @@ class AdminSite(object):
         """
         def inner(request, *args, **kwargs):
             if not self.has_permission(request):
-                if request.path == reverse('admin:logout', current_app=self.name):
-                    index_path = reverse('admin:index', current_app=self.name)
+                if request.path == reverse('djadmin:logout', current_app=self.name):
+                    index_path = reverse('djadmin:index', current_app=self.name)
                     return HttpResponseRedirect(index_path)
                 # Inner import to prevent djadmin (app) from
                 # importing django.contrib.auth.models.User (unrelated model).
                 from django.contrib.auth.views import redirect_to_login
                 return redirect_to_login(
                     request.get_full_path(),
-                    reverse('admin:login', current_app=self.name)
+                    reverse('djadmin:login', current_app=self.name)
                 )
             return view(request, *args, **kwargs)
         if not cacheable:
@@ -264,7 +264,7 @@ class AdminSite(object):
 
     @property
     def urls(self):
-        return self.get_urls(), 'admin', self.name
+        return self.get_urls(), 'djadmin', self.name
 
     def each_context(self, request):
         """
@@ -290,7 +290,7 @@ class AdminSite(object):
         """
         from djadmin.forms import AdminPasswordChangeForm
         from django.contrib.auth.views import PasswordChangeView
-        url = reverse('admin:password_change_done', current_app=self.name)
+        url = reverse('djadmin:password_change_done', current_app=self.name)
         defaults = {
             'form_class': AdminPasswordChangeForm,
             'success_url': url,
@@ -352,7 +352,7 @@ class AdminSite(object):
         """
         if request.method == 'GET' and self.has_permission(request):
             # Already logged-in, redirect to admin index
-            index_path = reverse('admin:index', current_app=self.name)
+            index_path = reverse('djadmin:index', current_app=self.name)
             return HttpResponseRedirect(index_path)
 
         from django.contrib.auth.views import LoginView
@@ -368,13 +368,13 @@ class AdminSite(object):
         )
         if (REDIRECT_FIELD_NAME not in request.GET and
                 REDIRECT_FIELD_NAME not in request.POST):
-            context[REDIRECT_FIELD_NAME] = reverse('admin:index', current_app=self.name)
+            context[REDIRECT_FIELD_NAME] = reverse('djadmin:index', current_app=self.name)
         context.update(extra_context or {})
 
         defaults = {
             'extra_context': context,
             'authentication_form': self.login_form or AdminAuthenticationForm,
-            'template_name': self.login_template or 'admin/login.html',
+            'template_name': self.login_template or 'djadmin/login.html',
         }
         request.current_app = self.name
         return LoginView.as_view(**defaults)(request)
@@ -418,12 +418,12 @@ class AdminSite(object):
             }
             if perms.get('change'):
                 try:
-                    model_dict['admin_url'] = reverse('admin:%s_%s_changelist' % info, current_app=self.name)
+                    model_dict['admin_url'] = reverse('djadmin:%s_%s_changelist' % info, current_app=self.name)
                 except NoReverseMatch:
                     pass
             if perms.get('add'):
                 try:
-                    model_dict['add_url'] = reverse('admin:%s_%s_add' % info, current_app=self.name)
+                    model_dict['add_url'] = reverse('djadmin:%s_%s_add' % info, current_app=self.name)
                 except NoReverseMatch:
                     pass
 
@@ -434,7 +434,7 @@ class AdminSite(object):
                     'name': apps.get_app_config(app_label).verbose_name,
                     'app_label': app_label,
                     'app_url': reverse(
-                        'admin:app_list',
+                        'djadmin:app_list',
                         kwargs={'app_label': app_label},
                         current_app=self.name,
                     ),
@@ -479,7 +479,7 @@ class AdminSite(object):
 
         request.current_app = self.name
 
-        return TemplateResponse(request, self.index_template or 'admin/index.html', context)
+        return TemplateResponse(request, self.index_template or 'djadmin/index.html', context)
 
     def app_index(self, request, app_label, extra_context=None):
         app_dict = self._build_app_dict(request, app_label)
@@ -499,8 +499,8 @@ class AdminSite(object):
         request.current_app = self.name
 
         return TemplateResponse(request, self.app_index_template or [
-            'admin/%s/app_index.html' % app_label,
-            'admin/app_index.html'
+            'djadmin/%s/app_index.html' % app_label,
+            'djadmin/app_index.html'
         ], context)
 
 # This global object represents the default admin site, for the common case.

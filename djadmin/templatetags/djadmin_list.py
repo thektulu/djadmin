@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import datetime
 import warnings
 
-from djadmin.templatetags.admin_urls import add_preserved_filters
+from djadmin.templatetags.djadmin_urls import add_preserved_filters
 from djadmin.utils import (
     display_for_field, display_for_value, get_fields_from_path,
     label_for_field, lookup_field,
@@ -46,7 +46,7 @@ def paginator_number(cl, i):
                            i + 1)
 
 
-@register.inclusion_tag('admin/pagination.html')
+@register.inclusion_tag('djadmin/pagination.html')
 def pagination(cl):
     """
     Generates the series of links to the pages in a paginated list.
@@ -180,7 +180,7 @@ def result_headers(cl):
 
 
 def _boolean_icon(field_val):
-    icon_url = static('admin/img/icon-%s.svg' %
+    icon_url = static('djadmin/img/icon-%s.svg' %
                       {True: 'yes', False: 'no', None: 'unknown'}[field_val])
     return format_html('<img src="{}" alt="{}" />', icon_url, field_val)
 
@@ -323,7 +323,7 @@ def result_hidden_fields(cl):
                 yield mark_safe(force_text(form[cl.model._meta.pk.name]))
 
 
-@register.inclusion_tag("admin/change_list_results.html")
+@register.inclusion_tag("djadmin/change_list_results.html")
 def result_list(cl):
     """
     Displays the headers and data list together
@@ -340,7 +340,7 @@ def result_list(cl):
             'results': list(results(cl))}
 
 
-@register.inclusion_tag('admin/date_hierarchy.html')
+@register.inclusion_tag('djadmin/date_hierarchy.html')
 def date_hierarchy(cl):
     """
     Displays the date hierarchy for date drill-down functionality.
@@ -419,7 +419,7 @@ def date_hierarchy(cl):
             }
 
 
-@register.inclusion_tag('admin/search_form.html')
+@register.inclusion_tag('djadmin/search_form.html')
 def search_form(cl):
     """
     Displays a search form for searching the list.
@@ -441,7 +441,7 @@ def admin_list_filter(cl, spec):
     })
 
 
-@register.inclusion_tag('admin/actions.html', takes_context=True)
+@register.inclusion_tag('djadmin/actions.html', takes_context=True)
 def admin_actions(context):
     """
     Track the number of times the action field has been rendered on the page,

@@ -30,7 +30,7 @@ class FilteredSelectMultiple(forms.SelectMultiple):
     @property
     def media(self):
         js = ["core.js", "SelectBox.js", "SelectFilter2.js"]
-        return forms.Media(js=["admin/js/%s" % path for path in js])
+        return forms.Media(js=["djadmin/js/%s" % path for path in js])
 
     def __init__(self, verbose_name, is_stacked, attrs=None, choices=()):
         self.verbose_name = verbose_name
@@ -53,8 +53,8 @@ class FilteredSelectMultiple(forms.SelectMultiple):
 class AdminDateWidget(forms.DateInput):
     @property
     def media(self):
-        js = ["calendar.js", "admin/DateTimeShortcuts.js"]
-        return forms.Media(js=["admin/js/%s" % path for path in js])
+        js = ["calendar.js", "djadmin/DateTimeShortcuts.js"]
+        return forms.Media(js=["djadmin/js/%s" % path for path in js])
 
     def __init__(self, attrs=None, format=None):
         final_attrs = {'class': 'vDateField', 'size': '10'}
@@ -66,8 +66,8 @@ class AdminDateWidget(forms.DateInput):
 class AdminTimeWidget(forms.TimeInput):
     @property
     def media(self):
-        js = ["calendar.js", "admin/DateTimeShortcuts.js"]
-        return forms.Media(js=["admin/js/%s" % path for path in js])
+        js = ["calendar.js", "djadmin/DateTimeShortcuts.js"]
+        return forms.Media(js=["djadmin/js/%s" % path for path in js])
 
     def __init__(self, attrs=None, format=None):
         final_attrs = {'class': 'vTimeField', 'size': '8'}
@@ -155,7 +155,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         if rel_to in self.admin_site._registry:
             # The related object is registered with the same AdminSite
             related_url = reverse(
-                'admin:%s_%s_changelist' % (
+                'djadmin:%s_%s_changelist' % (
                     rel_to._meta.app_label,
                     rel_to._meta.model_name,
                 ),
@@ -252,7 +252,7 @@ class RelatedFieldWidgetWrapper(forms.Widget):
     This class is a wrapper to a given widget to add the add icon for the
     admin interface.
     """
-    template = 'admin/related_widget_wrapper.html'
+    template = 'djadmin/related_widget_wrapper.html'
 
     def __init__(self, widget, rel, admin_site, can_add_related=None,
                  can_change_related=False, can_delete_related=False):
@@ -291,7 +291,7 @@ class RelatedFieldWidgetWrapper(forms.Widget):
         return self.widget.media
 
     def get_related_url(self, info, action, *args):
-        return reverse("admin:%s_%s_%s" % (info + (action,)),
+        return reverse("djadmin:%s_%s_%s" % (info + (action,)),
                        current_app=self.admin_site.name, args=args)
 
     def render(self, name, value, *args, **kwargs):

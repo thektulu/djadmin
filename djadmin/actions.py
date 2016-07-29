@@ -81,9 +81,9 @@ def delete_selected(modeladmin, request, queryset):
 
     # Display the confirmation page
     return TemplateResponse(request, modeladmin.delete_selected_confirmation_template or [
-        "admin/%s/%s/delete_selected_confirmation.html" % (app_label, opts.model_name),
-        "admin/%s/delete_selected_confirmation.html" % app_label,
-        "admin/delete_selected_confirmation.html"
+        "djadmin/%s/%s/delete_selected_confirmation.html" % (app_label, opts.model_name),
+        "djadmin/%s/delete_selected_confirmation.html" % app_label,
+        "djadmin/delete_selected_confirmation.html"
     ], context)
 
 delete_selected.short_description = ugettext_lazy("Delete selected %(verbose_name_plural)s")

@@ -6,7 +6,7 @@ from django.template.context import Context
 register = template.Library()
 
 
-@register.inclusion_tag('admin/prepopulated_fields_js.html', takes_context=True)
+@register.inclusion_tag('djadmin/prepopulated_fields_js.html', takes_context=True)
 def prepopulated_fields_js(context):
     """
     Creates a list of prepopulated_fields that should render Javascript for
@@ -39,7 +39,7 @@ def prepopulated_fields_js(context):
     return context
 
 
-@register.inclusion_tag('admin/submit_line.html', takes_context=True)
+@register.inclusion_tag('djadmin/submit_line.html', takes_context=True)
 def submit_row(context):
     """
     Displays the row of buttons for delete and save.
