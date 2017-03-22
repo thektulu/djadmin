@@ -571,7 +571,7 @@ class ModelAdmin(BaseModelAdmin):
             'core.js',
             'vendor/jquery/jquery%s.js' % extra,
             'jquery.init.js',
-            'djadmin/RelatedObjectLookups.js',
+            'admin/RelatedObjectLookups.js',
             'actions%s.js' % extra,
             'urlify.js',
             'prepopulate%s.js' % extra,

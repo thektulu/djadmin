@@ -53,7 +53,7 @@ class FilteredSelectMultiple(forms.SelectMultiple):
 class AdminDateWidget(forms.DateInput):
     @property
     def media(self):
-        js = ["calendar.js", "djadmin/DateTimeShortcuts.js"]
+        js = ["calendar.js", "admin/DateTimeShortcuts.js"]
         return forms.Media(js=["djadmin/js/%s" % path for path in js])
 
     def __init__(self, attrs=None, format=None):
@@ -66,7 +66,7 @@ class AdminDateWidget(forms.DateInput):
 class AdminTimeWidget(forms.TimeInput):
     @property
     def media(self):
-        js = ["calendar.js", "djadmin/DateTimeShortcuts.js"]
+        js = ["calendar.js", "admin/DateTimeShortcuts.js"]
         return forms.Media(js=["djadmin/js/%s" % path for path in js])
 
     def __init__(self, attrs=None, format=None):

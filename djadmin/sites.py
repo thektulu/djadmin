@@ -111,6 +111,12 @@ class AdminSite(object):
 
                 self._registry[model] = admin_obj
 
+    def admin(self, model_or_iterable, **options):
+        def register(admin_class):
+            self.register(model_or_iterable, admin_class=admin_class, **options)
+            return admin_class
+        return register
+
     def unregister(self, model_or_iterable):
         """
         Unregisters the given model(s).

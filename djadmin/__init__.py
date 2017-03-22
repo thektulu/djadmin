@@ -12,6 +12,7 @@ from djadmin.options import (
 )
 from djadmin.sites import AdminSite, site
 from django.utils.module_loading import autodiscover_modules
+from django.utils.version import get_version
 
 __all__ = [
     "register", "ACTION_CHECKBOX_NAME", "ModelAdmin", "HORIZONTAL", "VERTICAL",
@@ -25,5 +26,8 @@ __all__ = [
 def autodiscover():
     autodiscover_modules('djadmin', register_to=site)
 
+VERSION = (0, 11, 0, 'alpha', 0)
+
+__version__ = get_version(version=VERSION)
 
 default_app_config = 'djadmin.apps.AdminConfig'
