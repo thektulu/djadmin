@@ -2,6 +2,7 @@
 {% load i18n djadmin_urls static %}
 
 {% block extrahead %}
+    {{ block.super }}
     {{ media }}
     <script type="text/javascript" src="{% static 'djadmin/js/cancel.js' %}"></script>
 {% endblock %}

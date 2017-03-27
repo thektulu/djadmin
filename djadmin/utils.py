@@ -16,7 +16,9 @@ from django.utils import formats, six, timezone
 from django.utils.encoding import force_str, force_text, smart_text
 from django.utils.html import format_html
 from django.utils.text import capfirst
-from django.utils.translation import ungettext
+from django.utils.translation import (
+    override as translation_override, ungettext,
+)
 
 
 class FieldIsAForeignKeyColumnName(Exception):
@@ -28,12 +30,14 @@ def lookup_needs_distinct(opts, lookup_path):
     """
     Returns True if 'distinct()' should be used to query the given lookup path.
     """
-    lookup_fields = lookup_path.split('__')
+    lookup_fields = lookup_path.split(LOOKUP_SEP)
     # Remove the last item of the lookup path if it is a query term
     if lookup_fields[-1] in QUERY_TERMS:
         lookup_fields = lookup_fields[:-1]
     # Now go through the fields (following all relations) and look for an m2m
     for field_name in lookup_fields:
+        if field_name == 'pk':
+            field_name = opts.pk.name
         field = opts.get_field(field_name)
         if hasattr(field, 'get_path_info'):
             # This field is a relation, update opts to follow the relation
@@ -317,7 +321,7 @@ def _get_non_gfk_field(opts, name):
         raise FieldDoesNotExist()
 
     # Avoid coercing <FK>_id fields to FK
-    if field.is_relation and hasattr(field, 'attname') and field.attname == name:
+    if field.is_relation and not field.many_to_many and hasattr(field, 'attname') and field.attname == name:
         raise FieldIsAForeignKeyColumnName()
 
     return field
@@ -435,7 +439,7 @@ def display_for_value(value, empty_value_display, boolean=False):
     elif isinstance(value, (list, tuple)):
         return ', '.join(force_text(v) for v in value)
     else:
-        return smart_text(value)
+        return force_text(value)
 
 
 class NotRelationField(Exception):
@@ -500,10 +504,41 @@ def get_fields_from_path(model, path):
     return fields
 
 
-def remove_trailing_data_field(fields):
-    """ Discard trailing non-relation field if extant. """
-    try:
-        get_model_from_relation(fields[-1])
-    except NotRelationField:
-        fields = fields[:-1]
-    return fields
+def construct_change_message(form, formsets, add):
+    """
+    Construct a JSON structure describing changes from a changed object.
+    Translations are deactivated so that strings are stored untranslated.
+    Translation happens later on LogEntry access.
+    """
+    change_message = []
+    if add:
+        change_message.append({'added': {}})
+    elif form.changed_data:
+        change_message.append({'changed': {'fields': form.changed_data}})
+
+    if formsets:
+        with translation_override(None):
+            for formset in formsets:
+                for added_object in formset.new_objects:
+                    change_message.append({
+                        'added': {
+                            'name': force_text(added_object._meta.verbose_name),
+                            'object': force_text(added_object),
+                        }
+                    })
+                for changed_object, changed_fields in formset.changed_objects:
+                    change_message.append({
+                        'changed': {
+                            'name': force_text(changed_object._meta.verbose_name),
+                            'object': force_text(changed_object),
+                            'fields': changed_fields,
+                        }
+                    })
+                for deleted_object in formset.deleted_objects:
+                    change_message.append({
+                        'deleted': {
+                            'name': force_text(deleted_object._meta.verbose_name),
+                            'object': force_text(deleted_object),
+                        }
+                    })
+    return change_message
