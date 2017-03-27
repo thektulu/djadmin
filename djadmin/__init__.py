@@ -11,6 +11,8 @@ from djadmin.options import (
     HORIZONTAL, VERTICAL, ModelAdmin, StackedInline, TabularInline,
 )
 from djadmin.sites import AdminSite, site
+from djadmin.monkey_patch import apply_monkeypatches
+
 from django.utils.module_loading import autodiscover_modules
 from django.utils.version import get_version
 
@@ -25,6 +27,11 @@ __all__ = [
 
 def autodiscover():
     autodiscover_modules('djadmin', register_to=site)
+
+
+def monkeypathes():
+    apply_monkeypatches()
+
 
 VERSION = (0, 11, 0, 'alpha', 0)
 

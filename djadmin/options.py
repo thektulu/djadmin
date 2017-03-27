@@ -112,6 +112,7 @@ class BaseModelAdmin(six.with_metaclass(forms.MediaDefiningClass)):
     view_on_site = True
     show_full_result_count = True
     checks_class = BaseModelAdminChecks
+    view_permissions = ('view', 'change', 'add', 'delete')
 
     def check(self, **kwargs):
         return self.checks_class().check(self, **kwargs)
@@ -468,6 +469,18 @@ class BaseModelAdmin(six.with_metaclass(forms.MediaDefiningClass)):
         codename = get_permission_codename('delete', opts)
         return request.user.has_perm("%s.%s" % (opts.app_label, codename))
 
+    def has_view_permission(self, request, obj=None):
+        opts = self.opts
+        perms = set()
+        for view_perm in self.view_permissions:
+            if '.' in view_perm:
+                perms.add(view_perm)
+            else:
+                perms.add(
+                    "%s.%s" % (opts.app_label, get_permission_codename(view_perm, opts))
+                )
+        return bool(request.user.get_all_permissions() & perms)
+
     def has_module_permission(self, request):
         """
         Returns True if the given request has any permission in the given
@@ -560,6 +573,7 @@ class ModelAdmin(BaseModelAdmin):
             url(r'^(.+)/history/$', wrap(self.history_view), name='%s_%s_history' % info),
             url(r'^(.+)/delete/$', wrap(self.delete_view), name='%s_%s_delete' % info),
             url(r'^(.+)/change/$', wrap(self.change_view), name='%s_%s_change' % info),
+            url(r'^(.+)/view/$', wrap(self.view_view), name='%s_%s_view' % info),
             # For backwards compatibility (was the change url before 1.9)
             url(r'^(.+)/$', wrap(RedirectView.as_view(
                 pattern_name='%s:%s_%s_change' % ((self.admin_site.name,) + info)
@@ -1002,7 +1016,7 @@ class ModelAdmin(BaseModelAdmin):
         for formset in formsets:
             self.save_formset(request, form, formset, change=change)
 
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+    def render_change_form(self, request, context, add=False, change=False, view=False, form_url='', obj=None):
         opts = self.model._meta
         app_label = opts.app_label
         preserved_filters = self.get_preserved_filters(request)
@@ -1020,7 +1034,7 @@ class ModelAdmin(BaseModelAdmin):
             'form_url': form_url,
             'opts': opts,
             'content_type_id': get_content_type_for_model(self.model).pk,
-            'save_as': self.save_as,
+            'save_as': self.save_as or view,  # XXX: remove "Save and add another" in "view"
             'save_on_top': self.save_on_top,
             'to_field_var': TO_FIELD_VAR,
             'is_popup_var': IS_POPUP_VAR,
@@ -1504,11 +1518,99 @@ class ModelAdmin(BaseModelAdmin):
 
         return self.render_change_form(request, context, add=add, change=not add, obj=obj, form_url=form_url)
 
+    def viewform_view(self, request, object_id=None, form_url='', extra_context=None):
+        to_field = request.POST.get(TO_FIELD_VAR, request.GET.get(TO_FIELD_VAR))
+        if to_field and not self.to_field_allowed(request, to_field):
+            raise DisallowedModelAdminToField("The field %s cannot be referenced." % to_field)
+
+        model = self.model
+        opts = model._meta
+
+        obj = self.get_object(request, unquote(object_id), to_field)
+
+        if not self.has_view_permission(request, obj):
+            raise PermissionDenied
+
+        if obj is None:
+            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {
+                          'name': force_text(opts.verbose_name), 'key': escape(object_id)})
+
+        ModelForm = self.get_form(request, obj)
+
+        form = ModelForm(instance=obj)
+        formsets, inline_instances = self._create_formsets(request, obj, change=True)
+
+        fieldsets = list(self.get_fieldsets(request, obj))
+
+        admin_readonly_fields = list(self.get_readonly_fields(request, obj))
+        admin_readonly_fields_set = set(admin_readonly_fields)
+        fieldset_readonly_fields = []
+        for name, fieldset in fieldsets:
+            for field in fieldset['fields']:
+                if isinstance(field, (list, tuple)):
+                    for inline_field in field:
+                        if inline_field not in admin_readonly_fields_set:
+                            fieldset_readonly_fields.append(inline_field)
+                else:
+                    if field not in admin_readonly_fields_set:
+                        fieldset_readonly_fields.append(field) 
+
+        prepopulated_fields = {}
+        adminForm = helpers.AdminForm(
+            form, fieldsets, prepopulated_fields,
+            admin_readonly_fields + fieldset_readonly_fields,
+            model_admin=self,
+        )
+        media = self.media + adminForm.media
+
+        # TODO: make inlines readonly
+        inline_formsets = self.get_inline_formsets(request, formsets, inline_instances, obj)
+        for inline_formset in inline_formsets:
+            media = media + inline_formset.media
+
+        context = dict(
+            self.admin_site.each_context(request),
+            title=_('View %s') % force_text(opts.verbose_name),
+            adminform=adminForm,
+            object_id=object_id,
+            original=obj,
+            is_popup=(IS_POPUP_VAR in request.POST or
+                      IS_POPUP_VAR in request.GET),
+            to_field=to_field,
+            media=media,
+            inline_admin_formsets=inline_formsets,
+            errors=helpers.AdminErrorList(form, formsets),
+            preserved_filters=self.get_preserved_filters(request),
+            show_save=False,
+            show_save_and_continue=False
+        )
+
+        context.update(extra_context or {})
+
+        return self.render_change_form(request, context, add=False, change=False, view=True, obj=obj, form_url=form_url)
+
     def add_view(self, request, form_url='', extra_context=None):
         return self.changeform_view(request, None, form_url, extra_context)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        return self.changeform_view(request, object_id, form_url, extra_context)
+        try:
+            return self.changeform_view(request, object_id, form_url, extra_context)
+        except PermissionDenied:
+            opts = self.model._meta
+            preserved_filters = self.get_preserved_filters(request)
+            view_url = reverse(
+                'djadmin:%s_%s_view' % (opts.app_label, opts.model_name),
+                args=(quote(object_id),),
+                current_app=self.admin_site.name,
+            )
+            view_url = add_preserved_filters(
+                {'preserved_filters': preserved_filters, 'opts': opts}, view_url
+            )     
+            return HttpResponseRedirect(view_url)
+
+    def view_view(self, request, object_id, form_url='', extra_context=None):
+            return self.viewform_view(request, object_id, form_url, extra_context)
+
 
     @csrf_protect_m
     def changelist_view(self, request, extra_context=None):

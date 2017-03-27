@@ -18,6 +18,10 @@ class SimpleAdminConfig(AppConfig):
 class AdminConfig(SimpleAdminConfig):
     """The default AppConfig for admin which does autodiscovery."""
 
+    def import_models(self, *args):
+        self.module.monkeypathes()
+        super().import_models(*args)
+
     def ready(self):
         super(AdminConfig, self).ready()
         self.module.autodiscover()
